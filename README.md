@@ -51,3 +51,9 @@ reproduisent les verdicts du pipeline d'origine sur le corpus étalon.
 
 © Hexapost Studio — dépôt privé. Textes bibliques cités : *Parole de Vie* © Alliance biblique
 française (seuls les versets cités dans les études sont conservés, avec leur source).
+
+## Aperçu
+
+| Accueil | Suivi de génération |
+|---|---|
+| ![Accueil](docs/images/accueil-desktop.png) | ![Suivi du job en 5 étapes](docs/images/suivi-job.png) |
