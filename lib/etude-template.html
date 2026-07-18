@@ -1,0 +1,201 @@
+<title>{{TITLE}} — Étude fidèle</title>
+<style>
+  :root {
+    --ground: {{L_GROUND}};
+    --surface: {{L_SURFACE}};
+    --ink: {{L_INK}};
+    --ink-soft: {{L_INK_SOFT}};
+    --accent: {{L_ACCENT}};
+    --accent-soft: {{L_ACCENT_SOFT}};
+    --gold: #8A6A2F;
+    --gold-soft: #F5EEDD;
+    --rule: {{L_RULE}};
+    --row-alt: {{L_ROW_ALT}};
+    --serif: "Charter", "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+    --sans: "Seravek", "Gill Sans Nova", Ubuntu, Calibri, "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: {{D_GROUND}};
+      --surface: {{D_SURFACE}};
+      --ink: {{D_INK}};
+      --ink-soft: {{D_INK_SOFT}};
+      --accent: {{D_ACCENT}};
+      --accent-soft: {{D_ACCENT_SOFT}};
+      --gold: #C9A55C;
+      --gold-soft: #322B1D;
+      --rule: {{D_RULE}};
+      --row-alt: {{D_ROW_ALT}};
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: {{L_GROUND}}; --surface: {{L_SURFACE}}; --ink: {{L_INK}}; --ink-soft: {{L_INK_SOFT}};
+    --accent: {{L_ACCENT}}; --accent-soft: {{L_ACCENT_SOFT}}; --gold: #8A6A2F; --gold-soft: #F5EEDD;
+    --rule: {{L_RULE}}; --row-alt: {{L_ROW_ALT}};
+  }
+  :root[data-theme="dark"] {
+    --ground: {{D_GROUND}}; --surface: {{D_SURFACE}}; --ink: {{D_INK}}; --ink-soft: {{D_INK_SOFT}};
+    --accent: {{D_ACCENT}}; --accent-soft: {{D_ACCENT_SOFT}}; --gold: #C9A55C; --gold-soft: #322B1D;
+    --rule: {{D_RULE}}; --row-alt: {{D_ROW_ALT}};
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  .page { max-width: 46rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+  header.doc-head { border-bottom: 3px solid var(--accent); padding-bottom: 1.5rem; }
+  .eyebrow {
+    font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 0.75rem;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 4.5vw, 2.4rem); line-height: 1.2;
+    margin: 0 0 1.25rem; text-wrap: balance; color: var(--ink);
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; font-family: var(--sans); font-size: 0.9rem; }
+  .meta div { display: flex; gap: 0.45rem; }
+  .meta dt { margin: 0; color: var(--accent); font-weight: 600; }
+  .meta dd { margin: 0; color: var(--ink-soft); }
+
+  .notice {
+    margin: 1.75rem 0 0; padding: 0.9rem 1.1rem;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    border-radius: 0 4px 4px 0; font-size: 0.92rem; color: var(--ink-soft);
+  }
+  .notice strong { color: var(--ink); }
+
+  nav.toc { margin: 2.25rem 0 0; }
+  nav.toc h2 {
+    font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-soft); margin: 0 0 0.6rem;
+  }
+  nav.toc ol { margin: 0; padding-left: 1.4rem; font-family: var(--sans); font-size: 0.95rem; }
+  nav.toc li { margin: 0.3rem 0; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover, nav.toc a:focus-visible { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  section { margin-top: 3rem; }
+  h2.section-title {
+    font-size: 1.35rem; line-height: 1.3; color: var(--accent);
+    border-bottom: 1px solid var(--rule); padding-bottom: 0.5rem;
+    margin: 0 0 1.1rem; text-wrap: balance;
+  }
+  h2.section-title .no {
+    font-family: var(--sans); font-size: 0.85rem; font-weight: 700;
+    vertical-align: 0.35em; margin-right: 0.6rem; color: var(--ink-soft);
+  }
+  p { margin: 0 0 1rem; }
+  section > p:last-child { margin-bottom: 0; }
+  .vref { color: var(--accent); font-weight: 700; }
+
+  ul.liste, ol.liste { margin: 0 0 1rem; padding-left: 1.5rem; }
+  ul.liste li, ol.liste li { margin: 0.35rem 0; }
+  ul.liste ul { margin: 0.35rem 0 0.2rem; padding-left: 1.3rem; }
+
+  .encadre {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 1.1rem 1.3rem; margin: 0 0 1rem;
+  }
+  .encadre h3 {
+    font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 0.6rem;
+  }
+  .encadre ul, .encadre ol { margin: 0; padding-left: 1.5rem; }
+  .encadre li { margin: 0.3rem 0; }
+
+  .incertain {
+    border-bottom: 2px dotted var(--gold);
+    text-decoration: none;
+    cursor: help;
+  }
+  .reserve {
+    border: 1px dashed var(--gold); border-radius: 6px;
+    padding: 0.8rem 1.1rem; margin: 1.2rem 0;
+    color: var(--ink-soft); font-size: 0.95rem;
+  }
+  .reserve .label {
+    font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 0 0 0.3rem;
+  }
+  .reserve p { margin: 0; }
+
+  .prayer {
+    background: var(--gold-soft); border-left: 4px solid var(--gold);
+    border-radius: 0 4px 4px 0; padding: 1rem 1.2rem; margin: 1.4rem 0;
+  }
+  .prayer .label {
+    font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 0 0 0.4rem;
+  }
+  .prayer p { margin: 0; font-style: italic; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; }
+  table.versets { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.92rem; line-height: 1.5; }
+  table.versets caption { position: absolute; clip: rect(0 0 0 0); }
+  table.versets th {
+    font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.08em;
+    text-transform: uppercase; text-align: left;
+    background: var(--accent); color: #FFFFFF; padding: 0.65rem 0.8rem;
+  }
+  @media (prefers-color-scheme: dark) { table.versets th { color: {{D_TH_INK}}; } }
+  :root[data-theme="dark"] table.versets th { color: {{D_TH_INK}}; }
+  :root[data-theme="light"] table.versets th { color: #FFFFFF; }
+  table.versets td { padding: 0.7rem 0.8rem; border-top: 1px solid var(--rule); vertical-align: top; }
+  table.versets tbody tr:nth-child(even) { background: var(--row-alt); }
+  table.versets td.ref { font-family: var(--sans); font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 0.85rem; }
+  table.versets td.point { color: var(--ink-soft); font-size: 0.88rem; min-width: 11rem; }
+
+  .footnote { font-size: 0.85rem; color: var(--ink-soft); font-style: italic; margin-top: 0.8rem; }
+  footer.doc-foot {
+    margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--rule);
+    font-family: var(--sans); font-size: 0.82rem; color: var(--ink-soft);
+  }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #FFFFFF; font-size: 10.5pt; }
+    .page { max-width: 100%; padding: 0; }
+    .table-wrap { overflow-x: visible; border: none; }
+    table.versets { min-width: 0; font-size: 8.5pt; }
+    table.versets td.ref { white-space: normal; }
+    table.versets thead { display: table-header-group; }
+    tr, .prayer, .encadre, .reserve { break-inside: avoid; }
+    h2.section-title { break-after: avoid; }
+    nav.toc { display: none; }
+  }
+</style>
+
+<div class="page">
+  <header class="doc-head">
+    <p class="eyebrow">{{EYEBROW}}</p>
+    <h1>{{TITLE}}</h1>
+    <dl class="meta">
+      {{META_ITEMS}}
+    </dl>
+  </header>
+
+  <p class="notice"><strong>Nature du document.</strong> Retranscription fidèle et structurée de la prédication, établie à partir de l'enregistrement transcrit. Aucune analyse ni interprétation n'a été ajoutée : seuls le contenu, les versets, les illustrations et les prières prononcés par le prédicateur sont restitués, réorganisés pour la lecture et débarrassés des scories propres à la transcription orale automatique (répétitions, hésitations, phrases inachevées).</p>
+
+  <nav class="toc" aria-label="Sommaire">
+    <h2>Sommaire</h2>
+    <ol>
+      {{TOC_ITEMS}}
+    </ol>
+  </nav>
+
+  {{SECTIONS}}
+
+  <footer class="doc-foot">
+    {{FOOTER}}
+  </footer>
+</div>
