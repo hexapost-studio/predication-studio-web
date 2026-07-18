@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📖 Prédication Studio — web
 
-## Getting Started
+L'interface grand public du pipeline [predication-studio](https://github.com/hexapost-studio/predication-studio) :
+**une prédication entre (lien YouTube ou transcript), une étude fidèle sort** — lisible en ligne,
+téléchargeable en Word et PDF, chaque verset vérifié dans la traduction *Parole de Vie*, chaque
+citation contrôlée mot à mot contre l'enregistrement.
 
-First, run the development server:
+Toute la complexité (ingestion, structuration IA sous contrat, résolution des versets depuis un
+cache vérifié, contrôles de fidélité bloquants, rendus) est **cachée côté serveur** : le visiteur
+voit cinq étapes en langage simple et un « certificat de fidélité ».
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Fonctionnement
+
+```
+Lien YouTube / texte collé
+      │  /api/jobs (code d'accès + quota journalier)
+      ▼
+Récupération → Structuration IA → Versets (cache PDV) → Contrôles → Mise en page
+                (claude-sonnet-5,   (jamais l'IA)        (bloquants,   (HTML + Word)
+                 contrat strict)                          double passe
+                                                          auto si échec)
+      ▼
+Étude publiée dans la bibliothèque + certificat de fidélité
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Jobs par étapes** : chaque étape est un appel court ; l'état vit dans Supabase, la page de
+  suivi enchaîne les appels — compatible serverless, relançable, progression réelle affichée.
+- **Le texte biblique ne sort jamais du modèle** : cache `pdv_cache` (amorcé avec 82 versets
+  vérifiés), complété par récupération bible.com (PDV2017) pour les références nouvelles.
+- **Rien n'est publié si un contrôle échoue** : vocabulaire, versets (trois sens), citations
+  verbatim, couverture complète du transcript. Une passe de correction automatique est tentée,
+  sinon le job s'arrête en montrant le rapport.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next.js 16 (App Router) · Supabase (Postgres) · API Anthropic · déploiement Vercel.
+Aucun binaire externe : sous-titres YouTube via l'API timedtext, Word via `docx` (JS pur),
+PDF via l'impression navigateur (CSS print embarqué dans chaque étude).
 
-## Learn More
+## Démarrer
 
-To learn more about Next.js, take a look at the following resources:
+Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) (Supabase + clé Anthropic + Vercel, ~15 min).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Origine
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Les règles de fidélité, le contrat de structuration, les contrôles et le cache de versets
+proviennent du repo [predication-studio](https://github.com/hexapost-studio/predication-studio)
+(pipeline local, skill Claude Code `/predication`), validé sur les prédications du Camp IC2026
+et un culte complet EJP. Le script `scripts/sanity.ts` vérifie que les ports TypeScript
+reproduisent les verdicts du pipeline d'origine sur le corpus étalon.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+© Hexapost Studio — dépôt privé. Textes bibliques cités : *Parole de Vie* © Alliance biblique
+française (seuls les versets cités dans les études sont conservés, avec leur source).
