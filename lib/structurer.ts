@@ -1,7 +1,7 @@
 // Étape IA : transcript segmenté → content.json sous contrat strict.
 // Le modèle ne touche NI aux versets (résolus depuis le cache) NI au rendu.
 
-import Anthropic from "@anthropic-ai/sdk";
+import { completer } from "./llm";
 import type { Content } from "./types";
 
 const CONTRAT = `Tu produis la structuration fidèle d'une prédication chrétienne francophone à partir de son transcript (sous-titres automatiques, avec marqueurs [§N] tous les 200 mots).
@@ -39,24 +39,15 @@ export async function structurer(
   transcriptSegmente: string,
   titreConnu: string | null
 ): Promise<Content> {
-  const client = new Anthropic();
-  const message = await client.messages.create({
-    model: "claude-sonnet-5",
-    max_tokens: 32000,
-    system: CONTRAT,
-    messages: [
-      {
-        role: "user",
-        content:
-          (titreConnu ? `Titre YouTube de la vidéo : ${titreConnu}\n\n` : "") +
-          `Transcript segmenté :\n\n${transcriptSegmente}`,
-      },
-    ],
-  });
-  const text = message.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("");
+  const text = await completer(
+    CONTRAT,
+    (titreConnu ? `Titre YouTube de la vidéo : ${titreConnu}
+
+` : "") +
+      `Transcript segmenté :
+
+${transcriptSegmente}`
+  );
   const jsonStr = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```\s*$/, "");
   let content: Content;
   try {
@@ -75,26 +66,22 @@ export async function doublePasse(
   problemes: string[],
   transcriptSegmente: string
 ): Promise<Content> {
-  const client = new Anthropic();
-  const message = await client.messages.create({
-    model: "claude-sonnet-5",
-    max_tokens: 32000,
-    system: CONTRAT,
-    messages: [
-      {
-        role: "user",
-        content:
-          `Voici un content.json qui a ÉCHOUÉ aux contrôles de fidélité. Corrige-le (contenu fidèle, mêmes règles) et renvoie le JSON complet corrigé.\n\n` +
-          `ERREURS BLOQUANTES À CORRIGER :\n${problemes.map((p) => `- ${p}`).join("\n")}\n\n` +
-          `CONTENT.JSON ACTUEL :\n${JSON.stringify(content)}\n\n` +
-          `TRANSCRIPT SEGMENTÉ (source de vérité) :\n${transcriptSegmente}`,
-      },
-    ],
-  });
-  const text = message.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("");
+  const text = await completer(
+    CONTRAT,
+    `Voici un content.json qui a ÉCHOUÉ aux contrôles de fidélité. Corrige-le (contenu fidèle, mêmes règles) et renvoie le JSON complet corrigé.
+
+` +
+      `ERREURS BLOQUANTES À CORRIGER :
+${problemes.map((p) => `- ${p}`).join("\n")}
+
+` +
+      `CONTENT.JSON ACTUEL :
+${JSON.stringify(content)}
+
+` +
+      `TRANSCRIPT SEGMENTÉ (source de vérité) :
+${transcriptSegmente}`
+  );
   const jsonStr = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```\s*$/, "");
   return JSON.parse(jsonStr) as Content;
 }

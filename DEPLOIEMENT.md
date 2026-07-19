@@ -17,18 +17,30 @@ Trois prérequis, ~15 minutes.
    ```
    (URL et service_role key : Settings → API du projet Supabase.)
 
-## 2. Clé API Anthropic
+## 2. Clé du modèle IA (au choix)
 
-Sur [console.anthropic.com](https://console.anthropic.com) : créer une clé et vérifier que le
-compte a des **crédits actifs** (~0,50–2 € par prédication générée, modèle claude-sonnet-5).
-Ranger la clé dans `~/.secrets` comme d'habitude.
+L'app accepte trois fournisseurs — fournir AU MOINS une clé (rangée dans `~/.secrets`) :
+
+| Fournisseur | Variable | Modèles |
+|---|---|---|
+| **OpenRouter** (recommandé : une clé, tous les modèles) | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-5` (défaut), `anthropic/claude-opus-4.8`, `moonshotai/kimi-k3`, `openai/gpt-5.6-terra`, `qwen/qwen3.7-max`, `mistralai/mistral-medium-3.5`… |
+| Anthropic direct | `ANTHROPIC_API_KEY` | `claude-sonnet-5` (défaut) |
+| OpenAI direct | `OPENAI_API_KEY` | `gpt-5.6-terra` (défaut) |
+
+Choix explicite : `LLM_PROVIDER` et/ou `LLM_MODEL`. Compter ~0,50–2 € par prédication
+selon le modèle. **Vérifier que le compte a des crédits suffisants** : une prédication
+consomme ~35 000 tokens d'entrée + ~15 000 de sortie.
+
+⚠ Les contrôles de fidélité sont identiques quel que soit le modèle : un modèle plus
+faible échouera plus souvent aux contrôles (jobs en erreur plus fréquents), mais ne
+publiera jamais un document non conforme.
 
 ## 3. Vercel
 
 ```bash
 cd ~/projets/icc/predication-studio-web
 vercel link          # créer/lier le projet
-vercel env add ANTHROPIC_API_KEY production
+vercel env add OPENROUTER_API_KEY production   # ou ANTHROPIC_API_KEY / OPENAI_API_KEY
 vercel env add SUPABASE_URL production
 vercel env add SUPABASE_SERVICE_ROLE_KEY production
 vercel deploy --prod
