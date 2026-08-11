@@ -33,13 +33,24 @@ Récupération → Structuration IA → Versets (cache PDV) → Contrôles → M
 
 ## Stack
 
-Next.js 16 (App Router) · Supabase (Postgres) · API Anthropic · déploiement Vercel.
+Next.js 16 (App Router) · Supabase (Postgres) · modèle au choix (OpenRouter gratuit ou payant, Anthropic, OpenAI) · déploiement Vercel.
 Aucun binaire externe : sous-titres YouTube via l'API timedtext, Word via `docx` (JS pur),
 PDF via l'impression navigateur (CSS print embarqué dans chaque étude).
 
-## Démarrer
+## Installer chez soi
 
-Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) (Supabase + clé Anthropic + Vercel, ~15 min).
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhexapost-studio%2Fpredication-studio-web&env=OPENROUTER_API_KEY,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,LLM_MODEL&envDescription=Cle%20du%20modele%20IA%20et%20acces%20Supabase&envLink=https%3A%2F%2Fgithub.com%2Fhexapost-studio%2Fpredication-studio-web%2Fblob%2Fmain%2F.env.example&project-name=predication-studio&repository-name=predication-studio)
+
+Chacun peut déployer sa propre instance : **[INSTALLATION.md](INSTALLATION.md)** — en un
+clic, sur son ordinateur, ou en ligne de commande (~10 min, comptes gratuits).
+
+**Gratuit ou payant, au choix.** L'app accepte OpenRouter (modèles `:free` à 0 €, ou
+modèles payants), Anthropic ou OpenAI. Les contrôles de fidélité sont identiques dans
+tous les cas : un modèle gratuit échoue plus souvent aux contrôles (donc plus de
+reprises), il ne publiera jamais un document non conforme. Détail et limites du palier
+gratuit : [INSTALLATION.md](INSTALLATION.md#gratuit-ou-payant).
+
+Notes d'exploitation (quotas, codes d'accès, `maxDuration`) : [DEPLOIEMENT.md](DEPLOIEMENT.md).
 
 ## Origine
 
