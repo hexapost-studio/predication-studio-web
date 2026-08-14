@@ -37,15 +37,21 @@ Récupération → Structuration IA → Versets (cache PDV) → Contrôles → M
 ## Stack
 
 Next.js 16 (App Router) · Supabase (Postgres) · modèle au choix (OpenRouter gratuit ou payant, Anthropic, OpenAI) · déploiement Vercel.
-Aucun binaire externe : sous-titres YouTube via l'API timedtext, Word via `docx` (JS pur),
-PDF via l'impression navigateur (CSS print embarqué dans chaque étude).
+Word via `docx` (JS pur), PDF via l'impression navigateur (CSS print embarqué dans chaque étude).
 
-> **Limite connue :** YouTube exige de plus en plus souvent un jeton anti-robot pour
-> servir le contenu des sous-titres, que cette méthode sans binaire ne peut pas fournir —
-> la récupération par lien échoue alors avec un message clair invitant à coller le
-> transcript à la place (sous-titres copiés à la main, export NotebookLM, ou récupérés
-> localement avec un outil comme `yt-dlp`). Ce n'est pas propre à une vidéo ni à une
-> installation : c'est une restriction côté YouTube, hors de contrôle de l'application.
+**Sous-titres YouTube récupérés en cascade** (YouTube exige désormais un jeton anti-robot que
+la simple récupération HTTP ne peut plus fournir seule) :
+
+1. **`yt-dlp` local**, si le binaire est présent (recommandé pour une installation locale
+   fiable — voir [INSTALLATION.md](INSTALLATION.md#sous-titres-youtube-fiabilité)) — le
+   plus fiable, aucune limite connue à ce jour.
+2. **`youtubei.js`** (pur JavaScript, aucun binaire, fonctionne aussi sur un déploiement
+   Vercel serverless) — bon complément, fiabilité variable selon les vidéos.
+3. Récupération HTTP directe (historique) — filet gratuit à tenter, souvent bloqué.
+4. Message invitant à récupérer le transcript autrement (bookmarklet intégré à
+   l'interface qui lit le panneau « Afficher la transcription » de YouTube lui-même, export
+   NotebookLM, ou copier-coller) — la seule méthode garantie à 100 %, présentée comme un
+   chemin soigné plutôt qu'un simple message d'erreur.
 
 ## Installer chez soi
 

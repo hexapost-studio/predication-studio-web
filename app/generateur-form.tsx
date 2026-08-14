@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CopierPredicationGuide } from "./copier-predication-guide";
 
 export function GenerateurForm() {
   const router = useRouter();
@@ -10,6 +11,16 @@ export function GenerateurForm() {
   const [code, setCode] = useState("");
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
+
+  async function collerDuPressePapier() {
+    try {
+      const contenu = await navigator.clipboard.readText();
+      if (contenu.trim()) setTexte(contenu);
+    } catch {
+      // Permission navigateur refusée/non disponible : l'utilisateur peut
+      // toujours coller à la main (Cmd/Ctrl+V) dans le champ, rien de cassé.
+    }
+  }
 
   async function soumettre(e: React.FormEvent) {
     e.preventDefault();
@@ -37,7 +48,10 @@ export function GenerateurForm() {
   return (
     <form className="generer" onSubmit={soumettre}>
       <div className="champ">
-        <label htmlFor="url">Lien YouTube de la prédication</label>
+        <label htmlFor="url">
+          Lien YouTube de la prédication{" "}
+          <span className="note-inline">(optionnel — l&apos;essai automatique échoue parfois selon les protections de YouTube ; le champ texte ci-dessous fonctionne toujours)</span>
+        </label>
         <input
           id="url"
           type="url"
@@ -50,7 +64,12 @@ export function GenerateurForm() {
       </div>
       <div className="ou">ou</div>
       <div className="champ">
-        <label htmlFor="texte">Transcript en texte (export NotebookLM, sous-titres copiés…)</label>
+        <div className="champ-entete">
+          <label htmlFor="texte">Transcript en texte (export NotebookLM, sous-titres copiés…)</label>
+          <button type="button" className="bouton-discret" onClick={collerDuPressePapier} disabled={envoi}>
+            Coller depuis le presse-papier
+          </button>
+        </div>
         <textarea
           id="texte"
           placeholder="Collez ici le texte complet de la prédication…"
@@ -58,6 +77,7 @@ export function GenerateurForm() {
           onChange={(e) => setTexte(e.target.value)}
           disabled={envoi}
         />
+        <CopierPredicationGuide />
       </div>
       <div className="champ">
         <label htmlFor="code">Code d&apos;accès</label>

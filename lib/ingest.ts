@@ -1,8 +1,17 @@
-// Ingestion : lien YouTube (sous-titres FR via l'API timedtext, sans binaire)
-// ou texte collé/fichier (export NotebookLM, transcript brut).
+// Ingestion : lien YouTube ou texte collé/fichier (export NotebookLM, transcript brut).
 // Port TypeScript de scripts/ingest.py du repo predication-studio.
+//
+// Sous-titres YouTube récupérés en cascade (chaque étape ne s'exécute que si la
+// précédente a échoué) : yt-dlp local si présent (le plus fiable, mais binaire
+// optionnel absent en serverless) → youtubei.js (pur JS, aucun binaire, marche
+// aussi sur Vercel) → fetch() direct du baseUrl signé (historique, cassé sur la
+// plupart des vidéos depuis que YouTube exige un jeton anti-robot pour le servir,
+// conservé en dernier filet automatique car gratuit à tenter) → message invitant
+// à coller le transcript à la main (seule méthode garantie à 100%).
 
 import type { Segment } from "./types";
+import { fetchViaYtDlp } from "./ytdlp";
+import { fetchViaYoutubei } from "./youtubei-transcript";
 
 export const SEGMENT_WORDS = 200;
 
@@ -57,7 +66,7 @@ export function segmenter(transcript: string): { segments: Segment[]; segmente: 
   return { segments, segmente: parts.join(" ") };
 }
 
-// ---- Sous-titres YouTube (sans yt-dlp) ----
+// ---- Sous-titres YouTube ----
 
 export function youtubeId(url: string): string | null {
   const m = url.match(
@@ -73,9 +82,23 @@ interface CaptionTrack {
   name?: { simpleText?: string; runs?: { text: string }[] };
 }
 
-export async function fetchYoutube(url: string): Promise<{ titre: string | null; texte: string }> {
+export async function fetchYoutube(
+  url: string
+): Promise<{ titre: string | null; texte: string; methode: string }> {
   const id = youtubeId(url);
   if (!id) throw new Error("Lien YouTube non reconnu.");
+
+  const viaYtDlp = await fetchViaYtDlp(id);
+  if (viaYtDlp) return { ...viaYtDlp, methode: "yt-dlp local" };
+
+  const viaYoutubei = await fetchViaYoutubei(id);
+  if (viaYoutubei) return { ...viaYoutubei, methode: "youtubei.js" };
+
+  const viaFetch = await fetchDirect(id);
+  return { ...viaFetch, methode: "fetch direct" };
+}
+
+async function fetchDirect(id: string): Promise<{ titre: string | null; texte: string }> {
   const page = await fetch(`https://www.youtube.com/watch?v=${id}&hl=fr`, {
     headers: {
       "user-agent":
@@ -121,17 +144,18 @@ export async function fetchYoutube(url: string): Promise<{ titre: string | null;
     }
   }
   if (!texts.length) {
-    // YouTube exige de plus en plus souvent un jeton anti-robot pour servir le
-    // contenu des sous-titres (la requête réussit — HTTP 200 — mais renvoie un
-    // corps vide) ; ça ne dépend ni de la vidéo ni de la config de cette
-    // installation, donc relancer ne change rien. Le contournement fiable
-    // (outil dédié type yt-dlp) n'est pas compatible avec un déploiement
-    // serverless sans binaire : indiquer le mode de secours qui, lui, marche.
+    // Dernier maillon de la cascade (yt-dlp et youtubei.js ont déjà été tentés et
+    // ont échoué avant d'arriver ici) : YouTube exige de plus en plus souvent un
+    // jeton anti-robot pour servir le contenu des sous-titres par cette méthode
+    // historique (la requête réussit — HTTP 200 — mais renvoie un corps vide).
+    // Plus rien à tenter automatiquement : orienter vers le collage manuel, la
+    // seule méthode garantie à 100%.
     throw new Error(
-      "YouTube n'a pas transmis le contenu des sous-titres pour ce lien (protection anti-robot de leur " +
-        "côté, indépendante de cette installation). Récupérez le transcript autrement — sous-titres copiés " +
-        "manuellement, export NotebookLM, ou un outil comme yt-dlp en local — puis collez-le dans le champ " +
-        "texte ci-dessus à la place du lien."
+      "YouTube n'a pas transmis le contenu des sous-titres pour ce lien, malgré plusieurs méthodes " +
+        "essayées automatiquement (protection anti-robot de leur côté, indépendante de cette " +
+        "installation). Utilisez le raccourci « Copier la prédication » ci-dessus depuis la page " +
+        "YouTube, ou collez le transcript autrement (sous-titres copiés à la main, export NotebookLM) " +
+        "dans le champ texte à la place du lien."
     );
   }
   return { titre, texte: texts.join(" ") };
@@ -155,7 +179,7 @@ export async function ingest(input: { url?: string; texte?: string }): Promise<I
     const yt = await fetchYoutube(input.url);
     brut = yt.texte;
     titre = yt.titre;
-    rapport.push(`sous-titres YouTube récupérés (${brut.length} caractères)`);
+    rapport.push(`sous-titres YouTube récupérés via ${yt.methode} (${brut.length} caractères)`);
   } else if (input.texte) {
     brut = input.texte;
     rapport.push(`texte fourni (${brut.length} caractères)`);

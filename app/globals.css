@@ -80,6 +80,23 @@ form.generer { display: grid; gap: 1rem; }
   padding: 0.7rem 0.9rem; width: 100%;
 }
 .champ textarea { min-height: 7rem; font-size: 0.95rem; }
+.note-inline { font-weight: 400; text-transform: none; letter-spacing: normal; color: var(--ink-soft); }
+
+.champ-entete { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
+.bouton-discret {
+  font-family: var(--sans); font-size: 0.78rem; font-weight: 600;
+  background: transparent; color: var(--accent);
+  border: none; padding: 0; cursor: pointer; text-decoration: underline;
+}
+.bouton-discret:disabled { opacity: 0.5; cursor: default; }
+
+.guide-bookmarklet {
+  margin-top: 0.5rem; font-family: var(--sans); font-size: 0.85rem; color: var(--ink-soft);
+  background: var(--accent-soft); border-radius: 8px; padding: 0.7rem 0.9rem;
+}
+.guide-bookmarklet summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.guide-bookmarklet ol { margin: 0.6rem 0 0.4rem; padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+.guide-bookmarklet a { font-weight: 700; }
 .ou {
   display: flex; align-items: center; gap: 0.8rem;
   font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.1em;

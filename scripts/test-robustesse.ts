@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import { normaliser, estValide, parseJson } from "../lib/structurer";
 import { coerceVerseRows } from "../lib/verses";
+import { nettoyerVtt } from "../lib/ytdlp";
 import type { Content } from "../lib/types";
 
 let ok = 0;
@@ -91,6 +92,38 @@ test("ligne qui n'est pas un tableau est ignorée sans planter", () => {
 test("blocks sans aucun verseTable → tableau vide, pas d'erreur", () => {
   const blocks: Content["blocks"] = [["p", "x"]];
   assert.deepEqual(coerceVerseRows(blocks), []);
+});
+
+// --- nettoyerVtt() : parsing des fichiers .vtt produits par yt-dlp ---
+
+test("nettoyerVtt() retire l'en-tête, les timestamps et les doublons consécutifs", () => {
+  const vtt = [
+    "WEBVTT",
+    "Kind: captions",
+    "Language: fr",
+    "",
+    "00:00:01.000 --> 00:00:03.000",
+    "Bonjour à tous",
+    "",
+    "00:00:03.000 --> 00:00:05.000",
+    "Bonjour à tous",
+    "merci d'être venus",
+  ].join("\n");
+  assert.equal(nettoyerVtt(vtt), "Bonjour à tous merci d'être venus");
+});
+
+test("nettoyerVtt() retire les balises de karaoké des sous-titres auto-générés", () => {
+  const vtt = [
+    "WEBVTT",
+    "",
+    "00:00:01.000 --> 00:00:03.000",
+    "<00:00:01.200><c>Bonjour</c> <00:00:01.500><c>à</c> <00:00:01.800><c>tous</c>",
+  ].join("\n");
+  assert.equal(nettoyerVtt(vtt), "Bonjour à tous");
+});
+
+test("nettoyerVtt() sur un fichier vide renvoie une chaîne vide (pas une exception)", () => {
+  assert.equal(nettoyerVtt(""), "");
 });
 
 console.log(`\n${ok}/${total} tests passés`);

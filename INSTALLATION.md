@@ -106,6 +106,37 @@ ce qui empêche un inconnu de consommer vos crédits IA.
 
 ---
 
+## Sous-titres YouTube fiabilité
+
+YouTube exige désormais un jeton anti-robot pour servir le contenu des sous-titres à une
+simple requête HTTP — l'application essaie donc plusieurs méthodes automatiquement, dans
+l'ordre, avant de vous demander de coller le transcript à la main :
+
+1. **`yt-dlp` local** (le plus fiable) — installez-le si vous voulez une récupération par
+   lien fiable en usage local (Option 2 ci-dessus) :
+
+   ```bash
+   brew install yt-dlp deno   # macOS ; deno est nécessaire depuis fin 2025
+   ```
+
+   Sur Linux/Windows, voir [le guide d'installation officiel](https://github.com/yt-dlp/yt-dlp#installation).
+   YouTube change régulièrement ses protections : tenez `yt-dlp` à jour (`brew upgrade
+   yt-dlp` ou `yt-dlp -U`) si la récupération par lien recommence à échouer.
+   **Optionnel** : sans ce binaire, l'application retombe automatiquement sur les
+   méthodes suivantes — rien n'est requis pour faire fonctionner l'outil.
+
+2. **`youtubei.js`** (bibliothèque pur JavaScript, déjà incluse, aucune installation
+   requise) — fonctionne aussi bien en local que sur un déploiement Vercel, où `yt-dlp`
+   ne peut pas tourner (pas de binaire externe en serverless).
+
+3. Si les deux échouent : l'interface propose un raccourci « 📋 Copier la prédication »
+   (favori de navigateur) qui lit le panneau **« Afficher la transcription »** que
+   YouTube affiche lui-même à ses utilisateurs — aucun rapport avec la récupération
+   automatique, donc jamais affecté par ses limites. Un bouton « Coller depuis le
+   presse-papier » complète le champ texte en un clic après l'avoir utilisé.
+
+---
+
 ## Gratuit ou payant ?
 
 L'application fonctionne **à l'identique** dans les deux cas : les contrôles de
