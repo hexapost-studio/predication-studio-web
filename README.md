@@ -40,6 +40,13 @@ Next.js 16 (App Router) · Supabase (Postgres) · modèle au choix (OpenRouter g
 Aucun binaire externe : sous-titres YouTube via l'API timedtext, Word via `docx` (JS pur),
 PDF via l'impression navigateur (CSS print embarqué dans chaque étude).
 
+> **Limite connue :** YouTube exige de plus en plus souvent un jeton anti-robot pour
+> servir le contenu des sous-titres, que cette méthode sans binaire ne peut pas fournir —
+> la récupération par lien échoue alors avec un message clair invitant à coller le
+> transcript à la place (sous-titres copiés à la main, export NotebookLM, ou récupérés
+> localement avec un outil comme `yt-dlp`). Ce n'est pas propre à une vidéo ni à une
+> installation : c'est une restriction côté YouTube, hors de contrôle de l'application.
+
 ## Installer chez soi
 
 Il n'existe pas de version en ligne partagée que tout le monde utilise : chaque personne

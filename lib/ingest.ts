@@ -120,7 +120,20 @@ export async function fetchYoutube(url: string): Promise<{ titre: string | null;
       prev = line;
     }
   }
-  if (!texts.length) throw new Error("Sous-titres vides ou illisibles.");
+  if (!texts.length) {
+    // YouTube exige de plus en plus souvent un jeton anti-robot pour servir le
+    // contenu des sous-titres (la requête réussit — HTTP 200 — mais renvoie un
+    // corps vide) ; ça ne dépend ni de la vidéo ni de la config de cette
+    // installation, donc relancer ne change rien. Le contournement fiable
+    // (outil dédié type yt-dlp) n'est pas compatible avec un déploiement
+    // serverless sans binaire : indiquer le mode de secours qui, lui, marche.
+    throw new Error(
+      "YouTube n'a pas transmis le contenu des sous-titres pour ce lien (protection anti-robot de leur " +
+        "côté, indépendante de cette installation). Récupérez le transcript autrement — sous-titres copiés " +
+        "manuellement, export NotebookLM, ou un outil comme yt-dlp en local — puis collez-le dans le champ " +
+        "texte ci-dessus à la place du lien."
+    );
+  }
   return { titre, texte: texts.join(" ") };
 }
 
