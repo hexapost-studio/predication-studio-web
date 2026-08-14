@@ -166,6 +166,16 @@ passe à 1 000 requêtes/jour et les modèles `:free` restent facturés 0 €.
 À prévoir : un modèle gratuit échoue plus souvent aux contrôles de fidélité. Le job
 s'arrête alors en affichant le rapport, et il suffit de le relancer.
 
+> **Cultes très longs (2h+) : préférez un modèle payant.** Testé en conditions réelles
+> sur un culte de 2h47 (23 000 mots) avec trois modèles gratuits différents : l'un a
+> échoué côté fournisseur, un autre a produit un JSON tronqué, le troisième est allé
+> jusqu'au bout mais a échoué aux contrôles de fidélité (versets manquants, citations
+> non vérifiées, couverture du transcript non déclarée). Ce n'est pas propre à un
+> modèle précis : structurer fidèlement un document aussi long en une seule réponse
+> dépasse ce que les modèles gratuits actuels tiennent de façon fiable. Pour une
+> prédication de format habituel (30 min à 1h30), le palier gratuit fonctionne bien.
+> Au-delà de 2h, un modèle payant (voir ci-dessous) est nettement plus fiable.
+
 ### Payant — meilleure fidélité, moins de reprises
 
 ```
@@ -192,4 +202,5 @@ Rien d'autre à toucher — les études déjà publiées ne bougent pas.
 | « Code d'accès inconnu » | `schema.sql` non exécuté, ou code non personnalisé |
 | Quota du palier gratuit atteint | 50 requêtes/jour dépassées — attendre, ou créditer 10 $ |
 | Le job s'arrête sur un rapport de contrôle | Normal avec un modèle faible — relancer le job |
+| « Provider returned error » ou JSON invalide sur un très long culte | Modèle gratuit dépassé par un document de 2h+ — voir « Cultes très longs » ci-dessus, passez à un modèle payant |
 | Page de connexion Vercel au lieu du site | *Settings* → *Deployment Protection* → désactiver Vercel Authentication |
