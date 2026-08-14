@@ -35,7 +35,7 @@ MÉTA :
 
 Réponds UNIQUEMENT avec le JSON (aucun texte autour).`;
 
-function parseJson(text: string): unknown {
+export function parseJson(text: string): unknown {
   const jsonStr = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```\s*$/, "");
   return JSON.parse(jsonStr);
 }
@@ -44,15 +44,16 @@ function parseJson(text: string): unknown {
  *  forme exacte demandée et renvoient les clés attendues à un autre niveau — par
  *  exemple {"titre":…, "content":[…]} au lieu de {"meta":{"titre":…}, "blocks":[…]}.
  *  On corrige ces variantes connues avant d'abandonner, plutôt que d'échouer un job
- *  qui aurait pu aboutir avec une simple remise en forme. */
-function normaliser(data: unknown): Content {
+ *  qui aurait pu aboutir avec une simple remise en forme.
+ *  Exportée pour scripts/test-robustesse.ts (régression sur ces variantes réelles). */
+export function normaliser(data: unknown): Content {
   const obj = (data ?? {}) as Record<string, unknown>;
   const meta = (obj.meta ?? obj) as Record<string, unknown>;
   const blocks = obj.blocks ?? obj.content ?? obj.corps;
   return { ...obj, meta, blocks } as unknown as Content;
 }
 
-function estValide(content: Content): boolean {
+export function estValide(content: Content): boolean {
   return Boolean(content.meta?.titre) && Array.isArray(content.blocks);
 }
 
