@@ -1,5 +1,10 @@
 # Déploiement — Prédication Studio (web)
 
+Notes techniques de référence pour déployer et exploiter votre propre instance (quotas,
+codes d'accès, limites de la fonction serverless). Si c'est votre première installation,
+commencez plutôt par **[INSTALLATION.md](INSTALLATION.md)**, plus progressif et pensé
+pour un public non technique — revenez ici ensuite pour aller plus loin.
+
 Trois prérequis, ~15 minutes.
 
 ## 1. Supabase (base de données)

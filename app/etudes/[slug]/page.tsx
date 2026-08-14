@@ -8,12 +8,30 @@ export const revalidate = 300;
 
 export default async function PageEtude({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const sb = supabaseAdmin();
-  const { data: etude } = await sb
-    .from("etudes")
-    .select("slug, titre, orateur, occasion, favicon, rapport, nb_versets, nb_incertitudes, created_at")
-    .eq("slug", slug)
-    .maybeSingle();
+  let etude;
+  try {
+    const sb = supabaseAdmin();
+    const { data, error } = await sb
+      .from("etudes")
+      .select("slug, titre, orateur, occasion, favicon, rapport, nb_versets, nb_incertitudes, created_at")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) throw error;
+    etude = data;
+  } catch {
+    return (
+      <main>
+        <h1>Étude indisponible</h1>
+        <p className="lead">
+          Impossible de contacter la base de données pour l&apos;instant. Vérifiez la configuration
+          Supabase (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY) ou réessayez dans un instant.
+        </p>
+        <p className="note">
+          <Link href="/">← Retour à la bibliothèque</Link>
+        </p>
+      </main>
+    );
+  }
   if (!etude) notFound();
 
   const rapport = etude.rapport as QaReport | null;

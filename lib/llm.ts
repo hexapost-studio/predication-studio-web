@@ -14,7 +14,10 @@
 //   openai/gpt-5.6-terra · qwen/qwen3.7-max · mistralai/mistral-medium-3.5
 //
 // Modèles GRATUITS (OpenRouter, suffixe `:free`, 0 €) :
-//   nvidia/nemotron-3-super:free · openai/gpt-oss-20b:free · google/gemma-4-26b-a4b:free
+//   nvidia/nemotron-3-super-120b-a12b:free · openai/gpt-oss-20b:free ·
+//   google/gemma-4-26b-a4b-it:free
+//   Le catalogue `:free` change régulièrement (modèles retirés/renommés) : liste à jour
+//   sur openrouter.ai/models?max_price=0 (filtrer contexte ≥ 128k).
 //   Contraintes du palier gratuit : 20 requêtes/minute et 50 requêtes/jour
 //   (1 000/jour après 10 $ de crédits achetés une seule fois). Une prédication
 //   consomme 1 à 2 requêtes — le palier gratuit suffit largement à un usage normal.
@@ -35,11 +38,11 @@ const DEFAULT_MODEL: Record<Provider, string> = {
 const MAX_TOKENS_ANTHROPIC = 32000;
 
 function resolveProvider(): Provider {
-  const explicit = process.env.LLM_PROVIDER?.toLowerCase();
+  const explicit = process.env.LLM_PROVIDER?.trim().toLowerCase();
   if (explicit === "anthropic" || explicit === "openrouter" || explicit === "openai") {
     return explicit;
   }
-  const model = process.env.LLM_MODEL ?? "";
+  const model = (process.env.LLM_MODEL ?? "").trim();
   if (model.includes("/")) return "openrouter";
   if (model.startsWith("claude")) return "anthropic";
   if (model.startsWith("gpt")) return "openai";
@@ -53,7 +56,7 @@ function resolveProvider(): Provider {
 
 export function describeLlm(): { provider: Provider; model: string; gratuit: boolean } {
   const provider = resolveProvider();
-  const model = process.env.LLM_MODEL || DEFAULT_MODEL[provider];
+  const model = process.env.LLM_MODEL?.trim() || DEFAULT_MODEL[provider];
   return { provider, model, gratuit: model.endsWith(":free") };
 }
 
@@ -77,10 +80,20 @@ export async function completer(system: string, user: string, maxTokens?: number
   const plafond = maxTokens ?? maxTokensPour(provider);
 
   if (provider === "anthropic") {
-    const client = new Anthropic();
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error("Clé manquante pour le fournisseur anthropic (ANTHROPIC_API_KEY).");
+    }
+    const maxTokensDemandes = plafond ?? MAX_TOKENS_ANTHROPIC;
+    // Le SDK Anthropic refuse les appels non-streamés dont il estime qu'ils pourraient
+    // dépasser 10 minutes (formule interne ~ max_tokens/128000 h), et lève alors une
+    // erreur *avant même* d'appeler le réseau — y compris avec une clé valide, dès que
+    // max_tokens dépasse ~21 300 (notre plafond par défaut est 32 000). On fournit un
+    // timeout explicite couvrant ce pire cas pour désactiver ce garde-fou, avec marge.
+    const timeoutMs = Math.max(600_000, Math.ceil((3600 * maxTokensDemandes) / 128_000) * 1000 + 60_000);
+    const client = new Anthropic({ timeout: timeoutMs });
     const message = await client.messages.create({
       model,
-      max_tokens: plafond ?? MAX_TOKENS_ANTHROPIC,
+      max_tokens: maxTokensDemandes,
       system,
       messages: [{ role: "user", content: user }],
     });

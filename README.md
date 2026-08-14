@@ -39,10 +39,17 @@ PDF via l'impression navigateur (CSS print embarqué dans chaque étude).
 
 ## Installer chez soi
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhexapost-studio%2Fpredication-studio-web&env=OPENROUTER_API_KEY,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,LLM_MODEL&envDescription=Cle%20du%20modele%20IA%20et%20acces%20Supabase&envLink=https%3A%2F%2Fgithub.com%2Fhexapost-studio%2Fpredication-studio-web%2Fblob%2Fmain%2F.env.example&project-name=predication-studio&repository-name=predication-studio)
+Il n'existe pas de version en ligne partagée que tout le monde utilise : chaque personne
+(ou chaque église) installe sa propre instance, avec ses propres clés et sa propre base
+de données — vous restez seul propriétaire de vos études. **[INSTALLATION.md](INSTALLATION.md)**
+détaille trois façons d'y arriver, à choisir selon votre besoin plutôt que dans un ordre
+de préférence (~10 min, comptes gratuits) :
 
-Chacun peut déployer sa propre instance : **[INSTALLATION.md](INSTALLATION.md)** — en un
-clic, sur son ordinateur, ou en ligne de commande (~10 min, comptes gratuits).
+- **Sur votre ordinateur**, pour un usage strictement personnel.
+- **Votre propre site en ligne**, en un clic, si vous voulez un lien à partager avec un
+  groupe ou une église :
+  [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhexapost-studio%2Fpredication-studio-web&env=OPENROUTER_API_KEY,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,LLM_MODEL&envDescription=Cle%20du%20modele%20IA%20et%20acces%20Supabase&envLink=https%3A%2F%2Fgithub.com%2Fhexapost-studio%2Fpredication-studio-web%2Fblob%2Fmain%2F.env.example&project-name=predication-studio&repository-name=predication-studio)
+- **En ligne de commande**, si vous êtes à l'aise avec un terminal.
 
 **Gratuit ou payant, au choix.** L'app accepte OpenRouter (modèles `:free` à 0 €, ou
 modèles payants), Anthropic ou OpenAI. Les contrôles de fidélité sont identiques dans
@@ -60,11 +67,12 @@ proviennent du repo [predication-studio](https://github.com/hexapost-studio/pred
 et un culte complet EJP. Le script `scripts/sanity.ts` vérifie que les ports TypeScript
 reproduisent les verdicts du pipeline d'origine sur le corpus étalon.
 
-© Hexapost Studio — dépôt privé. Textes bibliques cités : *Parole de Vie* © Alliance biblique
-française (seuls les versets cités dans les études sont conservés, avec leur source).
+Sous licence MIT — voir [LICENSE](LICENSE). Textes bibliques cités : *Parole de Vie* ©
+Alliance biblique française (seuls les versets cités dans les études sont conservés, avec
+leur source).
 
 ## Aperçu
 
-| Accueil | Suivi de génération |
-|---|---|
-| ![Accueil](docs/images/accueil-desktop.png) | ![Suivi du job en 5 étapes](docs/images/suivi-job.png) |
+| Accueil (ordinateur) | Accueil (mobile) | Suivi de génération |
+|---|---|---|
+| ![Accueil](docs/images/accueil-desktop.png) | ![Accueil sur mobile](docs/images/accueil-mobile.png) | ![Suivi du job en 5 étapes](docs/images/suivi-job.png) |

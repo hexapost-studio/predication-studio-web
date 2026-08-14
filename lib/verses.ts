@@ -65,7 +65,19 @@ export interface ResolveResult {
 export async function resolveVerses(content: Content): Promise<ResolveResult> {
   const sb = supabaseAdmin();
   const rows: VerseRow[] = [];
-  for (const b of content.blocks) if (b[0] === "verseTable") rows.push(...(b[1] as VerseRow[]));
+  for (const b of content.blocks) {
+    if (b[0] !== "verseTable" || !Array.isArray(b[1])) continue;
+    for (const row of b[1] as unknown[]) {
+      if (!Array.isArray(row)) continue;
+      // Un modèle faible peut renvoyer une référence non-string (nombre, objet…) :
+      // on la force en texte plutôt que de faire planter tout le job — les
+      // contrôles de fidélité (étape suivante) la signaleront comme invalide.
+      if (typeof row[0] !== "string" || !row[0].trim()) {
+        row[0] = row[0] == null ? "(référence illisible)" : String(row[0]);
+      }
+      rows.push(row as VerseRow);
+    }
+  }
 
   const keys = rows.map((r) => normalizeRef(r[0]));
   const { data: cached } = await sb.from("pdv_cache").select("ref_norm, texte").in("ref_norm", keys);

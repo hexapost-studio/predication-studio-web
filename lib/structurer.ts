@@ -35,30 +35,63 @@ MÉTA :
 
 Réponds UNIQUEMENT avec le JSON (aucun texte autour).`;
 
+function parseJson(text: string): unknown {
+  const jsonStr = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```\s*$/, "");
+  return JSON.parse(jsonStr);
+}
+
+/** Certains modèles (surtout les modèles gratuits, plus petits) ignorent parfois la
+ *  forme exacte demandée et renvoient les clés attendues à un autre niveau — par
+ *  exemple {"titre":…, "content":[…]} au lieu de {"meta":{"titre":…}, "blocks":[…]}.
+ *  On corrige ces variantes connues avant d'abandonner, plutôt que d'échouer un job
+ *  qui aurait pu aboutir avec une simple remise en forme. */
+function normaliser(data: unknown): Content {
+  const obj = (data ?? {}) as Record<string, unknown>;
+  const meta = (obj.meta ?? obj) as Record<string, unknown>;
+  const blocks = obj.blocks ?? obj.content ?? obj.corps;
+  return { ...obj, meta, blocks } as unknown as Content;
+}
+
+function estValide(content: Content): boolean {
+  return Boolean(content.meta?.titre) && Array.isArray(content.blocks);
+}
+
 export async function structurer(
   transcriptSegmente: string,
   titreConnu: string | null
 ): Promise<Content> {
-  const text = await completer(
-    CONTRAT,
+  const user =
     (titreConnu ? `Titre YouTube de la vidéo : ${titreConnu}
 
 ` : "") +
-      `Transcript segmenté :
+    `Transcript segmenté :
 
-${transcriptSegmente}`
-  );
-  const jsonStr = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```\s*$/, "");
-  let content: Content;
-  try {
-    content = JSON.parse(jsonStr) as Content;
-  } catch {
-    throw new Error("La structuration n'a pas produit un JSON valide — relancez le job.");
+${transcriptSegmente}`;
+
+  for (let essai = 1; essai <= 2; essai++) {
+    const consigne =
+      essai === 1
+        ? CONTRAT
+        : CONTRAT +
+          `\n\nRAPPEL STRICT : la racine du JSON doit être exactement {"meta": {"titre": …, …}, "blocks": […]} — jamais "titre" ou "content" au premier niveau. Ta réponse précédente ne respectait pas cette forme.`;
+
+    const text = await completer(consigne, user);
+    let content: Content;
+    try {
+      content = normaliser(parseJson(text));
+    } catch {
+      if (essai < 2) continue;
+      throw new Error("La structuration n'a pas produit un JSON valide — relancez le job.");
+    }
+    if (estValide(content)) return content;
+    if (essai === 2) {
+      throw new Error(
+        "Structure invalide (meta/blocks manquants) — relancez le job, ou essayez un modèle " +
+          "plus capable (LLM_MODEL) si l'échec se répète : les modèles gratuits suivent parfois mal ce format strict."
+      );
+    }
   }
-  if (!content.meta?.titre || !Array.isArray(content.blocks)) {
-    throw new Error("Structure invalide (meta/blocks manquants) — relancez le job.");
-  }
-  return content;
+  throw new Error("Structure invalide (meta/blocks manquants) — relancez le job.");
 }
 
 export async function doublePasse(
@@ -67,7 +100,8 @@ export async function doublePasse(
   transcriptSegmente: string
 ): Promise<Content> {
   const text = await completer(
-    CONTRAT,
+    CONTRAT +
+      `\n\nRAPPEL STRICT : la racine du JSON doit être exactement {"meta": {"titre": …, …}, "blocks": […]}.`,
     `Voici un content.json qui a ÉCHOUÉ aux contrôles de fidélité. Corrige-le (contenu fidèle, mêmes règles) et renvoie le JSON complet corrigé.
 
 ` +
@@ -82,6 +116,14 @@ ${JSON.stringify(content)}
       `TRANSCRIPT SEGMENTÉ (source de vérité) :
 ${transcriptSegmente}`
   );
-  const jsonStr = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```\s*$/, "");
-  return JSON.parse(jsonStr) as Content;
+  let corrige: Content;
+  try {
+    corrige = normaliser(parseJson(text));
+  } catch {
+    throw new Error("La passe de correction n'a pas produit un JSON valide — relancez le job.");
+  }
+  // Si la correction a cassé la forme, mieux vaut garder le contenu d'origine
+  // (déjà valide en forme, même si imparfait) que de planter en aval sur un
+  // content.blocks manquant : le rapport de contrôles reste visible tel quel.
+  return estValide(corrige) ? corrige : content;
 }
