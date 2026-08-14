@@ -1,5 +1,8 @@
 # 📖 Prédication Studio — web
 
+[![CI](https://github.com/hexapost-studio/predication-studio-web/actions/workflows/ci.yml/badge.svg)](https://github.com/hexapost-studio/predication-studio-web/actions/workflows/ci.yml)
+[![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+
 L'interface grand public du pipeline [predication-studio](https://github.com/hexapost-studio/predication-studio) :
 **une prédication entre (lien YouTube ou transcript), une étude fidèle sort** — lisible en ligne,
 téléchargeable en Word et PDF, chaque verset vérifié dans la traduction *Parole de Vie*, chaque
